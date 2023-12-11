@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.distributed as dist
-from models.loss import DRLoss
+from loss import DRLoss
 
 
 def generate_random_orthogonal_matrix(feat_in, num_classes):
@@ -30,7 +30,7 @@ class ETFHead(nn.Module):
         return x / torch.norm(x, p=2, dim=1, keepdim=True)
 
 
-    def forward(self, x, y):
+    def forward(self, x , y):
         x = self.pre_logits(x)
         #
         pred = self.etf_vec[:, y].t()
