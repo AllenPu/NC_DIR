@@ -19,7 +19,7 @@ class ResNet_regression(nn.Module):
         self.Flatten = nn.Flatten(start_dim=1)
         #
         self.model_linear = nn.Sequential(nn.Linear(fc_inputs, output_dim))
-
+        self.output_shape = fc_inputs
         #self.mode = args.mode
         self.sigma = args.sigma
 
@@ -35,6 +35,9 @@ class ResNet_regression(nn.Module):
         # the ouput dim of the embed is : 512
         #
         return y_hat, z
+    
+    def output_shape(self):
+        return self.output_shape
 
 
 
