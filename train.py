@@ -173,6 +173,11 @@ if __name__ == '__main__':
         model = train_one_epoch(model, train_loader, opt, args, etf, e=0)
     mse_gt,  mse_pred, acc_g, mae_gt, mae_pred,\
                                     shot_dict_pred, shot_dict_gt, shot_dict_cls, gmean_gt, gmean_pred = test(model, test_loader, train_labels,args)
+    print(f' group prediction is {acc_g}')
+    print(f' the result of gt is : mse of gt is {mse_gt}, mae of gt is {mae_gt}')
+    print(' Gt Many: MAE {} Median: MAE {} Low: MAE {}'.format(shot_dict_gt['many']['l1'],shot_dict_gt['median']['l1'], shot_dict_gt['low']['l1']))
+    print(f' the result of pred is : mse of gt is {mse_pred}, mae of gt is {mae_pred}')
+    print(' Prediction Many: MAE {} Median: MAE {} Low: MAE {} '.format(shot_dict_pred['many']['l1'],shot_dict_pred['median']['l1'], shot_dict_pred['low']['l1']))
 
 
 
