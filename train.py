@@ -31,8 +31,9 @@ parser.add_argument('--data_dir', type=str,
                     default='', help='data directory')
 parser.add_argument('--img_size', type=int, default=224,
                     help='image size used in training')
-parser.add_argument('--workers', type=int, default=32,
+parser.add_argument('--workers', type=int, default=0,
                     help='number of workers used in data loading')
+parser.add_argument('--model_depth', type = int, default=50)
 #############################################
 #
 # Here is the param you need to tune
@@ -40,7 +41,7 @@ parser.add_argument('--workers', type=int, default=32,
 #############################################
 parser.add_argument('--groups', type=int, default=10,
                     help='number of split bins to the wole datasets')
-parser.add_argument('--batch_size', type=int, default=128, help='batch size')
+parser.add_argument('--batch_size', type=int, default=64, help='batch size')
 parser.add_argument('--lr', type=float, default=1e-3,
                     help='initial learning rate')
 parser.add_argument('--sigma', default=1.0, type=float)
@@ -53,7 +54,24 @@ parser.add_argument('--ce_weight', default=1, type=float)
 def get_dataset(args):
     print('=====> Preparing data...')
     print(f"File (.csv): {args.dataset}.csv")
-    df = pd.read_csv(os.path.join(args.data_dir, f"{args.dataset}.csv"))
+    df = pd.read_csv(os.path.join(args.data_dir, "meta", f"{args.dataset}.csv"))
+    df['age'] = df.age.astype(int)
+    val_set, test_set = [], []
+    import random
+    random.seed(args.seed)
+    for value in range(121):
+        curr_df = df[df['age'] == value]
+        curr_data = curr_df['path'].values
+        random.shuffle(curr_data)
+        curr_size = min(len(curr_data) // 3, 150)
+        val_set += list(curr_data[:curr_size])
+        test_set += list(curr_data[curr_size:curr_size * 2])
+    
+    assert len(set(val_set).intersection(set(test_set))) == 0
+    combined_set = dict(zip(val_set, [ 'val' for _ in range(len(val_set))]))
+    combined_set.update(dict(zip(test_set, [ 'test' for _ in range(len(test_set))])))
+    df['split'] = df['path'].map(combined_set)
+    df['split'].fillna('train', inplace= True)
     #if args.group_mode == 'b_g':
     #    nb_groups = int(args.groups)
     #    df = group_df(df, nb_groups)
@@ -82,12 +100,13 @@ def get_dataset(args):
     return train_loader, test_loader, val_loader, train_labels
 
 
-def train_one_epoch(model, train_loader, opt, args, etf, e=0):
+def train_one_epoch(model, train_loader, opt, args, etf, e):
     etf_weight, ce_weight = args.etf_weight, args.ce_weight
     mse = nn.MSELoss()
     ce = nn.CrossEntropyLoss()
     model.train()
-    for idx, (x,y,g) in enumerate(train_loader):
+    print('---------epoch: ', e, '---------')
+    for idx, (x,y,g,_) in enumerate(train_loader):
         x, y, g = x.to(device), y.to(device), g.to(device)
         y_output, z = model(x)
         y_chunk = torch.chunk(y_output, 2, dim=1)
@@ -101,6 +120,9 @@ def train_one_epoch(model, train_loader, opt, args, etf, e=0):
         opt.zero_grad()
         loss.backward()
         opt.step()
+        if idx % 200 == 0:
+            print('batch: ', idx)
+
     return model
 
 
@@ -168,9 +190,9 @@ if __name__ == '__main__':
         args)
     model = load_model(args)
     opt = optim.Adam(model.parameters(), lr=args.lr, weight_decay=5e-4)
-    etf = ETFHead(args.gorups, model.output_shape)
+    etf = ETFHead(args.groups, model.output_shape)
     for e in range(args.epoch):
-        model = train_one_epoch(model, train_loader, opt, args, etf, e=0)
+        model = train_one_epoch(model, train_loader, opt, args, etf, e)
     mse_gt,  mse_pred, acc_g, mae_gt, mae_pred,\
                                     shot_dict_pred, shot_dict_gt, shot_dict_cls, gmean_gt, gmean_pred = test(model, test_loader, train_labels,args)
     print(f' group prediction is {acc_g}')
