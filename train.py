@@ -54,27 +54,7 @@ parser.add_argument('--ce_weight', default=1, type=float)
 def get_dataset(args):
     print('=====> Preparing data...')
     print(f"File (.csv): {args.dataset}.csv")
-    df = pd.read_csv(os.path.join(args.data_dir, "meta", f"{args.dataset}.csv"))
-    df['age'] = df.age.astype(int)
-    val_set, test_set = [], []
-    import random
-    random.seed(args.seed)
-    for value in range(121):
-        curr_df = df[df['age'] == value]
-        curr_data = curr_df['path'].values
-        random.shuffle(curr_data)
-        curr_size = min(len(curr_data) // 3, 150)
-        val_set += list(curr_data[:curr_size])
-        test_set += list(curr_data[curr_size:curr_size * 2])
-    
-    assert len(set(val_set).intersection(set(test_set))) == 0
-    combined_set = dict(zip(val_set, [ 'val' for _ in range(len(val_set))]))
-    combined_set.update(dict(zip(test_set, [ 'test' for _ in range(len(test_set))])))
-    df['split'] = df['path'].map(combined_set)
-    df['split'].fillna('train', inplace= True)
-    #if args.group_mode == 'b_g':
-    #    nb_groups = int(args.groups)
-    #    df = group_df(df, nb_groups)
+    df = pd.read_csv(os.path.join(args.data_dir, f"{args.dataset}.csv"))
     df_train, df_val, df_test = df[df['split'] ==
                                    'train'], df[df['split'] == 'val'], df[df['split'] == 'test']
     ##### how to orgnize the datastes
