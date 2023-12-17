@@ -172,9 +172,9 @@ def test(model, test_loader, train_labels,args):
         gmean_pred = gmean(np.hstack(gmean_loss_all_pred), axis=None).astype(float)
         shot_dict_pred = shot_metric(pred, labels, train_labels)
         shot_dict_gt = shot_metric(pred_gt, labels, train_labels)
-        shot_dict_cls = shot_metric_cls(pred_g, pred_g_gt, train_labels,  labels)
+        # shot_dict_cls = shot_metric_cls(pred_g, pred_g_gt, train_labels,  labels)
         return [mse_gt.avg,  mse_pred.avg, acc_g.avg, mae_gt.avg, mae_pred.avg,\
-                                    shot_dict_pred, shot_dict_gt, shot_dict_cls, gmean_gt, gmean_pred]
+                                    shot_dict_pred, shot_dict_gt, gmean_gt, gmean_pred]   #shot_dict_cls,
 
 
 
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     for e in range(args.epoch):
         model = train_one_epoch(model, train_loader, opt, args, etf, e)
     mse_gt,  mse_pred, acc_g, mae_gt, mae_pred,\
-                                    shot_dict_pred, shot_dict_gt, shot_dict_cls, gmean_gt, gmean_pred = test(model, test_loader, train_labels,args)
+                                    shot_dict_pred, shot_dict_gt, gmean_gt, gmean_pred = test(model, test_loader, train_labels,args)  #shot_dict_cls,
     print(f' group prediction is {acc_g}')
     print(f' the result of gt is : mse of gt is {mse_gt}, mae of gt is {mae_gt}')
     print(' Gt Many: MAE {} Median: MAE {} Low: MAE {}'.format(shot_dict_gt['many']['l1'],shot_dict_gt['median']['l1'], shot_dict_gt['low']['l1']))
