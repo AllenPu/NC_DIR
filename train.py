@@ -89,15 +89,14 @@ def train_one_epoch(model, train_loader, opt, args, etf, e=0):
     model.train()
     for idx, (x,y,g) in enumerate(train_loader):
         x, y, g = x.to(device), y.to(device), g.to(device)
-        y_output, z = model(x)
-        y_chunk = torch.chunk(y_output, 2, dim=1)
-        y_hat, g_hat = y_chunk[0], y_chunk[1]
+        y_hat, z = model(x)
+        #y_chunk = torch.chunk(y_output, 2, dim=1)
+        #y_hat, g_hat = y_chunk[0], y_chunk[1]
         y_predicted = torch.gather(y_hat, dim=1, index=g.to(torch.int64))
         loss = 0
         loss_mse = mse(y_predicted, y)
         loss_etf = etf(z, g)
-        loss_ce = ce(g_hat, g.squeeze().long())
-        loss = loss_mse + etf_weight*loss_etf + ce_weight*loss_ce
+        loss = loss_mse + etf_weight*loss_etf
         opt.zero_grad()
         loss.backward()
         opt.step()
