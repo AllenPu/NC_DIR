@@ -31,8 +31,9 @@ parser.add_argument('--data_dir', type=str,
                     default='', help='data directory')
 parser.add_argument('--img_size', type=int, default=224,
                     help='image size used in training')
-parser.add_argument('--workers', type=int, default=32,
+parser.add_argument('--workers', type=int, default=0,
                     help='number of workers used in data loading')
+parser.add_argument('--model_depth', type = int, default=50)
 #############################################
 #
 # Here is the param you need to tune
@@ -40,7 +41,7 @@ parser.add_argument('--workers', type=int, default=32,
 #############################################
 parser.add_argument('--groups', type=int, default=10,
                     help='number of split bins to the wole datasets')
-parser.add_argument('--batch_size', type=int, default=128, help='batch size')
+parser.add_argument('--batch_size', type=int, default=64, help='batch size')
 parser.add_argument('--lr', type=float, default=1e-3,
                     help='initial learning rate')
 parser.add_argument('--sigma', default=1.0, type=float)
@@ -54,18 +55,15 @@ def get_dataset(args):
     print('=====> Preparing data...')
     print(f"File (.csv): {args.dataset}.csv")
     df = pd.read_csv(os.path.join(args.data_dir, f"{args.dataset}.csv"))
-    #if args.group_mode == 'b_g':
-    #    nb_groups = int(args.groups)
-    #    df = group_df(df, nb_groups)
     df_train, df_val, df_test = df[df['split'] ==
                                    'train'], df[df['split'] == 'val'], df[df['split'] == 'test']
     ##### how to orgnize the datastes
     train_dataset = IMDBWIKI(data_dir=args.data_dir, df=df_train, img_size=args.img_size,
-                             split='train', group_num=args.groups, group_mode=args.group_mode, reweight=args.reweight)
+                             split='train', group_num=args.groups,  reweight=None)
     val_dataset = IMDBWIKI(data_dir=args.data_dir, df=df_val, img_size=args.img_size,
-                           split='val', group_num=args.groups, group_mode=args.group_mode)
+                           split='val', group_num=args.groups)
     test_dataset = IMDBWIKI(data_dir=args.data_dir, df=df_test, img_size=args.img_size,
-                            split='test', group_num=args.groups, group_mode=args.group_mode)
+                            split='test', group_num=args.groups)
     #
     #train_group_cls_num = train_dataset.get_group()
     #
@@ -82,12 +80,13 @@ def get_dataset(args):
     return train_loader, test_loader, val_loader, train_labels
 
 
-def train_one_epoch(model, train_loader, opt, args, etf, e=0):
+def train_one_epoch(model, train_loader, opt, args, etf, e):
     etf_weight, ce_weight = args.etf_weight, args.ce_weight
     mse = nn.MSELoss()
     ce = nn.CrossEntropyLoss()
     model.train()
-    for idx, (x,y,g) in enumerate(train_loader):
+    print('---------epoch: ', e, '---------')
+    for idx, (x,y,g,_) in enumerate(train_loader):
         x, y, g = x.to(device), y.to(device), g.to(device)
         y_hat, z = model(x)
         #y_chunk = torch.chunk(y_output, 2, dim=1)
@@ -100,6 +99,9 @@ def train_one_epoch(model, train_loader, opt, args, etf, e=0):
         opt.zero_grad()
         loss.backward()
         opt.step()
+        if idx % 200 == 0:
+            print('batch: ', idx)
+
     return model
 
 
@@ -167,9 +169,9 @@ if __name__ == '__main__':
         args)
     model = load_model(args)
     opt = optim.Adam(model.parameters(), lr=args.lr, weight_decay=5e-4)
-    etf = ETFHead(args.gorups, model.output_shape)
+    etf = ETFHead(args.groups, model.output_shape)
     for e in range(args.epoch):
-        model = train_one_epoch(model, train_loader, opt, args, etf, e=0)
+        model = train_one_epoch(model, train_loader, opt, args, etf, e)
     mse_gt,  mse_pred, acc_g, mae_gt, mae_pred,\
                                     shot_dict_pred, shot_dict_gt, shot_dict_cls, gmean_gt, gmean_pred = test(model, test_loader, train_labels,args)
     print(f' group prediction is {acc_g}')

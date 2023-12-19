@@ -18,6 +18,7 @@ def generate_random_orthogonal_matrix(feat_in, num_classes):
 
 class ETFHead(nn.Module):
     def __init__(self, num_classes : int, feat_in : int) -> None:
+        super(ETFHead, self).__init__()
         orth_vec = generate_random_orthogonal_matrix(feat_in, num_classes)
         i_nc_nc = torch.eye(num_classes)
         one_nc_nc: torch.Tensor = torch.mul(torch.ones(
@@ -33,9 +34,11 @@ class ETFHead(nn.Module):
     def forward(self, x , y):
         x = self.pre_logits(x)
         #
-        pred = self.etf_vec[:, y].t()
+        pred = self.etf_vec[:, y.flatten().to(torch.long)].t()
+        pred = pred.to("cuda")
         #
-        loss = DRLoss(x, pred)
+        drloss = DRLoss()
+        loss = drloss.forward(x,pred)
         #
         return loss
         
