@@ -105,7 +105,7 @@ def train_one_epoch(model, train_loader, opt, args, etf, e):
     return model
 
 
-def test(model, test_loader, train_labels,args):
+def test(model, test_loader, train_labels, etf, args):
     model.eval()
     mse = nn.MSELoss()
     mse_gt = AverageMeter()
@@ -123,9 +123,12 @@ def test(model, test_loader, train_labels,args):
             inputs, targets, group = inputs.to(device), targets.to(device), group.to(device)
             labels.extend(targets.data.cpu().numpy())
             pred_g_gt.extend(group.data.cpu().numpy())
-            y_output, z = model(inputs.to(torch.float32))
-            y_chunk = torch.chunk(y_output, 2, dim=1)
-            g_hat, y_hat = y_chunk[0], y_chunk[1]
+            y_hat, z = model(inputs.to(torch.float32))
+            z_norm = etf.pre_logits(z)
+            cls_score = z_norm @ etf.etf_vec 
+            #y_chunk = torch.chunk(y_output, 2, dim=1)
+            #g_hat, y_hat = y_chunk[0], y_chunk[1]
+            g_hat = torch.topk(cls_score, dim=-1, k=1).indices
             g_index = torch.argmax(g_hat, dim=1).unsqueeze(-1)
             group = group.to(torch.int64)
             y_gt = torch.gather(y_hat, dim=1, index=group)
@@ -173,7 +176,7 @@ if __name__ == '__main__':
     for e in range(args.epoch):
         model = train_one_epoch(model, train_loader, opt, args, etf, e)
     mse_gt,  mse_pred, acc_g, mae_gt, mae_pred,\
-                                    shot_dict_pred, shot_dict_gt, gmean_gt, gmean_pred = test(model, test_loader, train_labels,args)  #shot_dict_cls,
+                                    shot_dict_pred, shot_dict_gt, gmean_gt, gmean_pred = test(model, test_loader, train_labels, etf, args)  #shot_dict_cls,
     print(f' group prediction is {acc_g}')
     print(f' the result of gt is : mse of gt is {mse_gt}, mae of gt is {mae_gt}')
     print(' Gt Many: MAE {} Median: MAE {} Low: MAE {}'.format(shot_dict_gt['many']['l1'],shot_dict_gt['median']['l1'], shot_dict_gt['low']['l1']))
