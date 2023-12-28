@@ -47,7 +47,7 @@ parser.add_argument('--lr', type=float, default=1e-3,
 parser.add_argument('--sigma', default=1.0, type=float)
 parser.add_argument('--epoch', default=100, type=int)
 parser.add_argument('--etf_weight', default=1, type=float)
-parser.add_argument('--ce_weight', default=1, type=float)
+parser.add_argument('--ce_weight', default=0, type=float)
 
 
 
@@ -95,7 +95,8 @@ def train_one_epoch(model, train_loader, opt, args, etf, e):
         loss = 0
         loss_mse = mse(y_predicted, y)
         loss_etf = etf(z, g)
-        loss = loss_mse + etf_weight*loss_etf
+        loss_ce = ce(z, g)
+        loss = loss_mse + etf_weight*loss_etf + ce_weight*loss_ce
         opt.zero_grad()
         loss.backward()
         opt.step()
