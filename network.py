@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torchvision
 import torch
+from mlp import MLPFFNNeck
 
 
 class ResNet_regression(nn.Module):
@@ -18,8 +19,13 @@ class ResNet_regression(nn.Module):
         #
         self.Flatten = nn.Flatten(start_dim=1)
         #
+        mlp_output = 512
+        #
+        self.mlp = MLPFFNNeck(in_channels=fc_inputs, out_channels=mlp_output)
+        #
         self.model_linear = nn.Sequential(nn.Linear(fc_inputs, output_dim))
-        self.output_shape = fc_inputs
+        #
+        self.output_shape = mlp_output
         #self.mode = args.mode
         self.sigma = args.sigma
 
@@ -29,6 +35,8 @@ class ResNet_regression(nn.Module):
         z = self.model_extractor(x)
         #
         z = self.Flatten(z)
+        #
+        z = self.mlp(z)
         #
         y_hat = self.model_linear(z)
         #

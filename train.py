@@ -15,6 +15,7 @@ import argparse
 import pandas as pd
 from ETFHead import ETFHead
 from network import ResNet_regression
+from mlp import MLPFFNNeck
 from dataset import IMDBWIKI
 from utils import AverageMeter, accuracy, adjust_learning_rate,shot_metric, shot_metric_balanced, shot_metric_cls, \
     setup_seed, balanced_metrics, gmean
