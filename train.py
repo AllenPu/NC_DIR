@@ -174,7 +174,7 @@ if __name__ == '__main__':
         args)
     model = load_model(args)
     opt = optim.Adam(model.parameters(), lr=args.lr, weight_decay=5e-4)
-    etf = ETFHead(args.groups, model.output_shape)
+    etf = ETFHead(args.groups, model.output_shape).to(device)
     for e in range(args.epoch):
         model = train_one_epoch(model, train_loader, opt, args, etf, e)
     mse_gt,  mse_pred, acc_g, mae_gt, mae_pred,\
