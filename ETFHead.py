@@ -17,7 +17,7 @@ def generate_random_orthogonal_matrix(feat_in, num_classes):
 
 
 class ETFHead(nn.Module):
-    def __init__(self, num_classes : int, feat_in : int) -> None:
+    def __init__(self, num_classes : int, feat_in : int, device = 'cpu') -> None:
         super(ETFHead, self).__init__()
         orth_vec = generate_random_orthogonal_matrix(feat_in, num_classes)
         i_nc_nc = torch.eye(num_classes)
@@ -25,6 +25,7 @@ class ETFHead(nn.Module):
             num_classes, num_classes), (1 / num_classes))
         self.etf_vec = torch.mul(torch.matmul(orth_vec, i_nc_nc - one_nc_nc),
                             math.sqrt(num_classes / (num_classes - 1)))
+        self.etf_vec = self.etf_vec.to(device)
 
 
     def pre_logits(self, x):
@@ -33,10 +34,12 @@ class ETFHead(nn.Module):
 
     def forward(self, x , y):
         x = self.pre_logits(x)
-        print(f' deive is {x.device} and {y.device} and {self.etf_vec.device}')
+        #print(f' deive is {x.device} and {y.device} and {self.etf_vec.device}')
         #
         pred = self.etf_vec[:, y.flatten().to(torch.long)].t()
-        pred = pred.to("cuda")
+        pred = pred.to(x.device)
+        #
+        print(f' deive is {x.device} and {y.device} and {self.etf_vec.device}')
         #
         drloss = DRLoss()
         loss = drloss.forward(x,pred)
