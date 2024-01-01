@@ -138,6 +138,7 @@ def test(model, test_loader, train_labels, etf, args):
             #print(f' the g_hat is {g_hat}')
             torch.save(etf.etf_vec, 'etf_vec.pt')
             torch.save(z_norm, 'z_norm.pt')
+            torch.save(group, 'group.pt')
             assert 1 == 0
             group = group.to(torch.int64)
             y_gt = torch.gather(y_hat, dim=1, index=group)
