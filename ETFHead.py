@@ -33,6 +33,7 @@ class ETFHead(nn.Module):
 
     def forward(self, x , y):
         x = self.pre_logits(x)
+        print(f' deive is {x.device} and {y.device} and {self.etf_vec.device}')
         #
         pred = self.etf_vec[:, y.flatten().to(torch.long)].t()
         pred = pred.to("cuda")
