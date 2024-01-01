@@ -39,7 +39,7 @@ class ETFHead(nn.Module):
         pred = self.etf_vec[:, y.flatten().to(torch.long)].t()
         pred = pred.to(x.device)
         #
-        print(f' deive is {x.device} and {y.device} and {self.etf_vec.device}')
+        #print(f' deive is {x.device} and {y.device} and {self.etf_vec.device}')
         #
         drloss = DRLoss()
         loss = drloss.forward(x,pred)
