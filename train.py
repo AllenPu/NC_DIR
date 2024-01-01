@@ -132,10 +132,13 @@ def test(model, test_loader, train_labels, etf, args):
             #g_hat, y_hat = y_chunk[0], y_chunk[1]
             g_hat = torch.topk(cls_score, dim=-1, k=1).indices
             g_index = torch.argmax(g_hat, dim=1).unsqueeze(-1)
-            print(f' etf {etf.etf_vec}')
-            print(f' z_norm {z_norm}')
-            print(f' the cls score {cls_score}')
-            print(f' the g_hat is {g_hat}')
+            #print(f' etf {etf.etf_vec}')
+            #print(f' z_norm {z_norm}')
+            #print(f' the cls score {cls_score}')
+            #print(f' the g_hat is {g_hat}')
+            torch.save(etf.etf_vec.item(), 'etf_vec.pt')
+            torch.save(z_norm, 'z_norm.pt')
+            assert 1 == 0
             group = group.to(torch.int64)
             y_gt = torch.gather(y_hat, dim=1, index=group)
             pred_gt.extend(y_gt.data.cpu().numpy())
