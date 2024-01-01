@@ -23,7 +23,7 @@ class ResNet_regression(nn.Module):
         #
         self.mlp = MLPFFNNeck(in_channels=fc_inputs, out_channels=mlp_output)
         #
-        self.model_linear = nn.Sequential(nn.Linear(fc_inputs, output_dim))
+        self.model_linear = nn.Sequential(nn.Linear(mlp_output, output_dim))
         #
         self.output_shape = mlp_output
         #self.mode = args.mode
@@ -36,7 +36,7 @@ class ResNet_regression(nn.Module):
         #
         #z = self.Flatten(z)
         #
-        z = self.mlp(z)
+        z = self.mlp(z)       
         #
         y_hat = self.model_linear(z)
         #
