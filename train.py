@@ -29,7 +29,7 @@ parser.add_argument('--mode', default='train', type=str)
 parser.add_argument('--dataset', type=str, default='imdb_wiki',
                     choices=['imdb_wiki'], help='dataset name')
 parser.add_argument('--data_dir', type=str,
-                    default='/home/ruizhipu/scratch/regression/imbalanced-regression/imdb-wiki-dir/data', help='data directory')
+                    default='/home/rpu2/scratch/data/imbalanced-regression/imdb-wiki-dir/data', help='data directory')
 parser.add_argument('--img_size', type=int, default=224,
                     help='image size used in training')
 parser.add_argument('--workers', type=int, default=0,
