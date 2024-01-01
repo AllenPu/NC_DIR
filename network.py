@@ -36,6 +36,7 @@ class ResNet_regression(nn.Module):
         #
         z = self.Flatten(z)
         #
+        print(f' input shape {z.shape}')
         z = self.mlp(z)
         #
         y_hat = self.model_linear(z)
