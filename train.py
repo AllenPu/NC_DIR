@@ -132,6 +132,8 @@ def test(model, test_loader, train_labels, etf, args):
             #g_hat, y_hat = y_chunk[0], y_chunk[1]
             g_hat = torch.topk(cls_score, dim=-1, k=1).indices
             g_index = torch.argmax(g_hat, dim=1).unsqueeze(-1)
+            print(f' the cls score {cls_score}')
+            print(f' the g_hat is {g_hat}')
             group = group.to(torch.int64)
             y_gt = torch.gather(y_hat, dim=1, index=group)
             pred_gt.extend(y_gt.data.cpu().numpy())
