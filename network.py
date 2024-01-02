@@ -21,7 +21,7 @@ class ResNet_regression(nn.Module):
         #
         mlp_output = 512
         #
-        self.mlp = MLPFFNNeck(in_channels=fc_inputs, out_channels=mlp_output)
+        self.mlp = nn.Sequential(MLPFFNNeck(in_channels=fc_inputs, out_channels=mlp_output))
         #
         self.model_linear = nn.Sequential(nn.Linear(mlp_output, output_dim))
         #
