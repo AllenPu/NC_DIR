@@ -181,6 +181,7 @@ if __name__ == '__main__':
     train_loader, test_loader, val_loader,  train_labels = get_dataset(
         args)
     model = load_model(args)
+    print(model)
     opt = optim.Adam(model.parameters(), lr=args.lr, weight_decay=5e-4)
     etf = ETFHead(args.groups, model.output_shape, device)
     for e in range(args.epoch):
