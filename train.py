@@ -87,7 +87,7 @@ def train_one_epoch(model, train_loader, opt, args, etf, e):
     mse = nn.MSELoss()
     ce = nn.CrossEntropyLoss()
     model.train()
-    print('---------epoch: ', e, '---------')
+    #print('---------epoch: ', e, '---------')
     for idx, (x,y,g,_) in enumerate(train_loader):
         x, y, g = x.to(device), y.to(device), g.to(device)
         y_hat, z = model(x)
@@ -102,8 +102,8 @@ def train_one_epoch(model, train_loader, opt, args, etf, e):
         opt.zero_grad()
         loss.backward()
         opt.step()
-        if idx % 200 == 0:
-            print('batch: ', idx)
+        #if idx % 200 == 0:
+        #    print('batch: ', idx)
 
     return model
 
@@ -162,8 +162,8 @@ def test(model, test_loader, train_labels, etf, args):
         shot_dict_pred = shot_metric(pred, labels, train_labels)
         shot_dict_gt = shot_metric(pred_gt, labels, train_labels)
         # shot_dict_cls = shot_metric_cls(pred_g, pred_g_gt, train_labels,  labels)
-        with open('group.pkl', 'wb') as f:
-            pickle.dump(pred_g_gt, f)
+        #with open('group.pkl', 'wb') as f:
+        #    pickle.dump(pred_g_gt, f)
             #
         return [mse_gt.avg,  mse_pred.avg, acc_g.avg, mae_gt.avg, mae_pred.avg,\
                                     shot_dict_pred, shot_dict_gt, gmean_gt, gmean_pred]   #shot_dict_cls,
