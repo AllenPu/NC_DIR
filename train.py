@@ -163,7 +163,7 @@ def test(model, test_loader, train_labels, etf, args):
         shot_dict_gt = shot_metric(pred_gt, labels, train_labels)
         # shot_dict_cls = shot_metric_cls(pred_g, pred_g_gt, train_labels,  labels)
         with open('group.pkl', 'wb') as f:
-            pickle.dump(group, f)
+            pickle.dump(pred_g_gt, f)
             #
         return [mse_gt.avg,  mse_pred.avg, acc_g.avg, mae_gt.avg, mae_pred.avg,\
                                     shot_dict_pred, shot_dict_gt, gmean_gt, gmean_pred]   #shot_dict_cls,
