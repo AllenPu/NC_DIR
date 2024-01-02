@@ -19,6 +19,7 @@ from mlp import MLPFFNNeck
 from dataset import IMDBWIKI
 from utils import AverageMeter, accuracy, adjust_learning_rate,shot_metric, shot_metric_balanced, shot_metric_cls, \
     setup_seed, balanced_metrics, gmean
+import pickle
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -136,10 +137,6 @@ def test(model, test_loader, train_labels, etf, args):
             #print(f' z_norm {z_norm}')
             #print(f' the cls score {cls_score}')
             #print(f' the g_hat is {g_hat}')
-            torch.save(etf.etf_vec, 'etf_vec.pt')
-            torch.save(z_norm, 'z_norm.pt')
-            torch.save(group, 'group.pt')
-            assert 1 == 0
             group = group.to(torch.int64)
             y_gt = torch.gather(y_hat, dim=1, index=group)
             pred_gt.extend(y_gt.data.cpu().numpy())
@@ -165,6 +162,9 @@ def test(model, test_loader, train_labels, etf, args):
         shot_dict_pred = shot_metric(pred, labels, train_labels)
         shot_dict_gt = shot_metric(pred_gt, labels, train_labels)
         # shot_dict_cls = shot_metric_cls(pred_g, pred_g_gt, train_labels,  labels)
+        with open('group.pkl', 'wb') as f:
+            pickle.dump(group, f)
+            #
         return [mse_gt.avg,  mse_pred.avg, acc_g.avg, mae_gt.avg, mae_pred.avg,\
                                     shot_dict_pred, shot_dict_gt, gmean_gt, gmean_pred]   #shot_dict_cls,
 
